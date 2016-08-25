@@ -1,6 +1,7 @@
 (function () {
     app.controller('mainController', function ($scope) {
 
+        $scope.file = {obj: undefined};
         $scope.swaggerObject = {};
 
         $scope.tabs = [
@@ -12,6 +13,11 @@
 
         $scope.setCurrentTab = function(tab) {
             $scope.currentTab = tab;
-        }
+        };
+
+        $scope.loadFile = function() {
+            var name = $scope.file.obj.name;
+            //...
+        };
     });
 })();
