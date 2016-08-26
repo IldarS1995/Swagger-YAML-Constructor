@@ -16,8 +16,24 @@
         };
 
         $scope.loadFile = function() {
-            var name = $scope.file.obj.name;
-            //...
+            var reader = new FileReader();
+            reader.readAsText($scope.file.obj, "UTF-8");
+            reader.onload = function(e) {
+                var doc;
+                try {
+                    doc = jsyaml.safeLoad(e.target.result);
+                }
+                catch (e) {
+                    console.log(e);
+                    return;
+                }
+
+                console.log(doc);
+                $scope.swaggerObject = doc;
+            };
+            reader.onerror = function(e) {
+                console.log(e);
+            };
         };
     });
 })();
