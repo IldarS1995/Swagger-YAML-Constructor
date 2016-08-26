@@ -1,1 +1,36 @@
-222222222222222222222222
+<div>
+    <h3>General info</h3>
+    <table>
+        <tr>
+            <td>API version:</td>
+            <td><input type="text" ng-model="swaggerObject.info.version"></td>
+        </tr>
+        <tr>
+            <td>API title:</td>
+            <td><input type="text" ng-model="swaggerObject.info.title"></td>
+        </tr>
+        <tr>
+            <td>Host:</td>
+            <td><input type="text" ng-model="swaggerObject.host"></td>
+        </tr>
+        <tr>
+            <td>Base path:</td>
+            <td><input type="text" ng-model="swaggerObject.basePath"></td>
+        </tr>
+    </table>
+
+    <h3>Tags</h3>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+        <tr ng-repeat="tag in swaggerObject.tags">
+            <td><input type="text" ng-model="tag.name"></td>
+            <td><input type="text" ng-model="tag.description"></td>
+            <td><button type="button" ng-click="removeTag($index)">Remove tag</button></td>
+        </tr>
+    </table>
+    <button type="button" ng-click="addTag()">Add new tag</button>
+</div>
