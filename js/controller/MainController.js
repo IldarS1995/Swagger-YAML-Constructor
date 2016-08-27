@@ -11,6 +11,10 @@
         ];
         $scope.currentTab = $scope.tabs[0];
 
+        $scope.definitionTypes = ["object", "array"];
+
+        $scope.defPropertyTypes = ["$ref", "integer", "string", "boolean", "array"];
+
         $scope.setCurrentTab = function (tab) {
             $scope.currentTab = tab;
         };
@@ -31,10 +35,57 @@
                 console.log(doc);
                 $scope.$apply(function () {
                     $scope.swaggerObject = doc;
+                    $scope.postProcessLoad();
                 });
             };
             reader.onerror = function (e) {
                 console.log(e);
+            };
+        };
+
+        $scope.postProcessLoad = function () {
+            var obj = $scope.swaggerObject;
+
+            $scope.processDefinitions(obj);
+            $scope.processPaths(obj);
+        };
+
+        $scope.processDefinitions = function (obj) {
+            for (def in obj.definitions) {
+                var defObj = obj.definitions[def];
+                defObj.name = def;
+
+                for (prop in defObj.properties) {
+                    var defObjProp = defObj.properties[prop];
+                    defObjProp.name = prop;
+                    if (defObjProp.$ref) {
+                        defObjProp.type = "$ref";
+                    }
+                }
+            }
+        };
+
+        $scope.isSelected = function (ref, key) {
+            return ref === '#/definitions/' + key;
+        };
+
+        $scope.processPaths = function (obj) {
+            for (path in obj.paths) {
+                obj.paths[path].path = path;
+            }
+        };
+
+        $scope.newSwaggerFile = function () {
+            $scope.swaggerObject = {
+                swagger: "2.0",
+                info: {},
+                host: "",
+                basePath: "",
+                tags: [],
+                paths: [],
+                definitions: [],
+                schemes: "http",
+                produces: "application/json"
             };
         };
 
@@ -47,10 +98,15 @@
 
 
         $scope.saveAsYaml = function () {
-            $scope.removeHashKeys($scope.swaggerObject.tags);
+            $scope.preProcessSave();
             var yamlContent = jsyaml.dump($scope.swaggerObject);
             var blob = new Blob([yamlContent], {type: "text/plain;charset=utf-8"});
             saveAs(blob, "yaml_result.yaml");
+        };
+
+        $scope.preProcessSave = function () {
+            $scope.removeHashKeys();
+
         };
         $scope.removeHashKeys = function (arr) {
             for (i in arr) {
