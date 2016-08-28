@@ -1,38 +1,77 @@
 <div>
     <div ng-repeat="def in swaggerObject.definitions" style="border-bottom: 1px solid black;">
-        <span>Name: </span> <input type="text" ng-model="def.name"> <br />
+        <span>Name: </span> <input type="text" ng-model="def.name"> <br/>
         <span>Type: </span>
-        <select ng-model="def.type" ng-options="type for type in definitionTypes" ></select> <br />
+        <select ng-model="def.type" ng-options="type for type in definitionTypes"></select> <br/>
 
-        Properties:
-        <table border="1">
-            <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Type</th>
-                <th>Value</th>
-            </tr>
-            <tr ng-repeat="prop in def.properties">
-                <td>
-                    <input type="text" ng-model="prop.name">
-                </td>
-                <td>
-                    <input type="text" ng-model="prop.description">
-                </td>
-                <td>
-                    <select ng-model="prop.type" ng-options="type for type in defPropertyTypes"></select>
-                </td>
-                <td>
-                    <div ng-if="prop.type == '$ref'">
-                        <select ng-model="prop.$ref">
-                            <option ng-repeat="(key, val) in swaggerObject.definitions" ng-value="'#/definitions/' + key">{{key}}</option>
-                        </select>
-                    </div>
-                    <div ng-if="prop.type == 'array'">
-                        <!-- todo -->
-                    </div>
-                </td>
-            </tr>
-        </table>
+        <div ng-switch="def.type">
+
+            <div ng-switch-when="array">
+                <select ng-model="def.items.type"
+                        ng-options="type for type in innerPropertyTypes"></select>
+                <div ng-if="def.items.type == '$ref'">
+                    <select>
+                        <option ng-repeat="(key, val) in swaggerObject.definitions"
+                                ng-selected="def.items.$ref == prefixDef(key)"
+                                ng-click="def.items.$ref = prefixDef(key)">
+                            {{key}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div ng-switch-when="object">
+                Properties:
+                <table border="1">
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr ng-repeat="prop in def.properties">
+                        <td>
+                            <input type="text" ng-model="prop.name">
+                        </td>
+                        <td>
+                            <input type="text" ng-model="prop.description">
+                        </td>
+                        <td>
+                            <select ng-model="prop.type" ng-options="type for type in defPropertyTypes"></select>
+                        </td>
+                        <td>
+                            <div ng-switch="prop.type">
+                                <div ng-switch-when="$ref">
+                                    <select>
+                                        <option ng-repeat="(key, val) in swaggerObject.definitions"
+                                                ng-selected="prop.$ref == prefixDef(key)"
+                                                ng-click="prop.$ref = prefixDef(key)">
+                                            {{key}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div ng-switch-when="array">
+                                    <select ng-model="prop.items.type"
+                                            ng-options="type for type in innerPropertyTypes"></select>
+                                    <div ng-if="prop.items.type == '$ref'">
+                                        <select>
+                                            <option ng-repeat="(key, val) in swaggerObject.definitions"
+                                                    ng-selected="prop.items.$ref == prefixDef(key)"
+                                                    ng-click="prop.items.$ref = prefixDef(key)">
+                                                {{key}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div ng-switch-default>
+                                    <i>No value</i>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
     </div>
 </div>

@@ -15,6 +15,9 @@
 
         $scope.defPropertyTypes = ["$ref", "integer", "string", "boolean", "array"];
 
+        $scope.innerPropertyTypes = ["$ref", "integer", "string", "boolean"];
+
+
         $scope.setCurrentTab = function (tab) {
             $scope.currentTab = tab;
         };
@@ -55,24 +58,84 @@
                 var defObj = obj.definitions[def];
                 defObj.name = def;
 
+                if (defObj.type == 'array' && defObj.items.$ref) {
+                    defObj.items.type = '$ref';
+                }
+
                 for (prop in defObj.properties) {
                     var defObjProp = defObj.properties[prop];
                     defObjProp.name = prop;
                     if (defObjProp.$ref) {
                         defObjProp.type = "$ref";
                     }
+                    if (defObjProp.type == 'array' && defObjProp.items.$ref) {
+                        defObjProp.items.type = '$ref';
+                    }
                 }
             }
         };
 
-        $scope.isSelected = function (ref, key) {
-            return ref === '#/definitions/' + key;
+        $scope.cleanDefinitionIntermediateData = function (obj) {
+            for (def in obj.definitions) {
+                var defObj = obj.definitions[def];
+                delete defObj.name;
+
+                if (defObj.type == 'array') {
+                    delete defObj.properties;
+                    if (defObj.items.type == '$ref') {
+                        delete defObj.items.type;
+                    }
+                    else {
+                        delete defObj.items.$ref;
+                    }
+                }
+                else if (defObj.type == 'object') {
+                    delete defObj.items;
+
+                    for (prop in defObj.properties) {
+                        var defObjProp = defObj.properties[prop];
+                        delete defObjProp.name;
+                        if (defObjProp.type != '$ref') {
+                            delete defObjProp.$ref;
+                        }
+                        else {
+                            delete defObjProp.type;
+                        }
+
+                        if (defObjProp.type != 'array') {
+                            delete defObjProp.items;
+                        }
+                        else if (defObjProp.type == 'array' && defObjProp.items.type == '$ref') {
+                            delete defObjProp.items.type;
+                        }
+                    }
+                }
+            }
+        };
+
+        $scope.preProcessSave = function (obj) {
+            $scope.removeHashKeys(obj.tags);
+
+            $scope.cleanDefinitionIntermediateData(obj);
+            $scope.cleanPathsIntermediateData(obj);
         };
 
         $scope.processPaths = function (obj) {
             for (path in obj.paths) {
                 obj.paths[path].path = path;
             }
+        };
+
+        $scope.cleanPathsIntermediateData = function (obj) {
+
+        };
+
+        $scope.isSelected = function (ref, key) {
+            return ref === '#/definitions/' + key;
+        };
+
+        $scope.prefixDef = function (def) {
+            return "#/definitions/" + def;
         };
 
         $scope.newSwaggerFile = function () {
@@ -98,16 +161,13 @@
 
 
         $scope.saveAsYaml = function () {
-            $scope.preProcessSave();
-            var yamlContent = jsyaml.dump($scope.swaggerObject);
+            var swaggerObjectCopy = angular.copy($scope.swaggerObject);
+            $scope.preProcessSave(swaggerObjectCopy);
+            var yamlContent = jsyaml.dump(swaggerObjectCopy);
             var blob = new Blob([yamlContent], {type: "text/plain;charset=utf-8"});
             saveAs(blob, "yaml_result.yaml");
         };
 
-        $scope.preProcessSave = function () {
-            $scope.removeHashKeys();
-
-        };
         $scope.removeHashKeys = function (arr) {
             for (i in arr) {
                 delete arr[i].$$hashKey;
