@@ -35,7 +35,6 @@
                     return;
                 }
 
-                console.log(doc);
                 $scope.$apply(function () {
                     $scope.swaggerObject = doc;
                     $scope.postProcessLoad();
@@ -78,6 +77,12 @@
         $scope.cleanDefinitionIntermediateData = function (obj) {
             for (def in obj.definitions) {
                 var defObj = obj.definitions[def];
+                if (def != defObj.name) {
+                    //DTO definition name was changed; change the JSON key name from def to defObj.name
+                    obj.definitions[defObj.name] = defObj;
+                    delete obj.definitions[def];
+                }
+
                 delete defObj.name;
 
                 if (defObj.type == 'array') {
@@ -118,6 +123,11 @@
 
             $scope.cleanDefinitionIntermediateData(obj);
             $scope.cleanPathsIntermediateData(obj);
+        };
+
+        $scope.setPropRef = function (prop, val) {
+            prop.$ref = val;
+            alert(prop.$ref);
         };
 
         $scope.processPaths = function (obj) {
@@ -172,6 +182,28 @@
             for (i in arr) {
                 delete arr[i].$$hashKey;
             }
+        };
+
+        $scope.addNewDefinition = function () {
+            var newName = "ObjDto_" + Math.random();
+            if (!$scope.swaggerObject.definitions) {
+                $scope.swaggerObject.definitions = {};
+            }
+
+            $scope.swaggerObject.definitions[newName] = {
+                name: newName,
+                type: "object",
+                properties: {}
+            };
+        };
+        $scope.addNewProperty = function (def) {
+            var newName = "property_" + Math.random();
+
+            def.properties[newName] = {
+                name: newName,
+                description: "descr",
+                type: "integer"
+            };
         };
     });
 })();

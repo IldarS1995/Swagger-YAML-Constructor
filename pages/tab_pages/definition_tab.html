@@ -42,10 +42,8 @@
                         <td>
                             <div ng-switch="prop.type">
                                 <div ng-switch-when="$ref">
-                                    <select>
-                                        <option ng-repeat="(key, val) in swaggerObject.definitions"
-                                                ng-selected="prop.$ref == prefixDef(key)"
-                                                ng-click="prop.$ref = prefixDef(key)">
+                                    <select ng-model="prop.$ref">
+                                        <option ng-repeat="(key, val) in swaggerObject.definitions" value="{{prefixDef(key)}}">
                                             {{key}}
                                         </option>
                                     </select>
@@ -70,8 +68,10 @@
                         </td>
                     </tr>
                 </table>
+                <button type="button" ng-click="addNewProperty(def)">Add new property</button>
             </div>
 
         </div>
     </div>
+    <button type="button" ng-click="addNewDefinition()">Add new definition</button>
 </div>
