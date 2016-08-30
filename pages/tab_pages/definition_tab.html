@@ -10,11 +10,9 @@
                 <select ng-model="def.items.type"
                         ng-options="type for type in innerPropertyTypes"></select>
                 <div ng-if="def.items.type == '$ref'">
-                    <select>
-                        <option ng-repeat="(key, val) in swaggerObject.definitions"
-                                ng-selected="def.items.$ref == prefixDef(key)"
-                                ng-click="def.items.$ref = prefixDef(key)">
-                            {{key}}
+                    <select ng-model="def.items.$ref">
+                        <option ng-repeat="(key, val) in swaggerObject.definitions" value="{{prefixDef(key)}}">
+                            {{val.name}}
                         </option>
                     </select>
                 </div>
@@ -28,6 +26,7 @@
                         <th>Description</th>
                         <th>Type</th>
                         <th>Value</th>
+                        <th>Actions</th>
                     </tr>
                     <tr ng-repeat="prop in def.properties">
                         <td>
@@ -44,7 +43,7 @@
                                 <div ng-switch-when="$ref">
                                     <select ng-model="prop.$ref">
                                         <option ng-repeat="(key, val) in swaggerObject.definitions" value="{{prefixDef(key)}}">
-                                            {{key}}
+                                            {{val.name}}
                                         </option>
                                     </select>
                                 </div>
@@ -52,11 +51,9 @@
                                     <select ng-model="prop.items.type"
                                             ng-options="type for type in innerPropertyTypes"></select>
                                     <div ng-if="prop.items.type == '$ref'">
-                                        <select>
-                                            <option ng-repeat="(key, val) in swaggerObject.definitions"
-                                                    ng-selected="prop.items.$ref == prefixDef(key)"
-                                                    ng-click="prop.items.$ref = prefixDef(key)">
-                                                {{key}}
+                                        <select ng-model="prop.items.$ref">
+                                            <option ng-repeat="(key, val) in swaggerObject.definitions" value="{{prefixDef(key)}}">
+                                                {{val.name}}
                                             </option>
                                         </select>
                                     </div>
@@ -66,9 +63,13 @@
                                 </div>
                             </div>
                         </td>
+                        <td>
+                            <button type="button" ng-click="deleteProperty(def, prop)">Delete property</button>
+                        </td>
                     </tr>
                 </table>
                 <button type="button" ng-click="addNewProperty(def)">Add new property</button>
+                <button type="button" ng-click="deleteDefinition(def)">Delete the definition</button>
             </div>
 
         </div>

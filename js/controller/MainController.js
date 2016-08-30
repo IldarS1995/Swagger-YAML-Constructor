@@ -13,9 +13,9 @@
 
         $scope.definitionTypes = ["object", "array"];
 
-        $scope.defPropertyTypes = ["$ref", "integer", "string", "boolean", "array"];
+        $scope.defPropertyTypes = ["$ref", "integer", "number", "string", "boolean", "array"];
 
-        $scope.innerPropertyTypes = ["$ref", "integer", "string", "boolean"];
+        $scope.innerPropertyTypes = ["$ref", "integer", "number", "string", "boolean"];
 
 
         $scope.setCurrentTab = function (tab) {
@@ -56,6 +56,7 @@
             for (def in obj.definitions) {
                 var defObj = obj.definitions[def];
                 defObj.name = def;
+                defObj.initialName = def;
 
                 if (defObj.type == 'array' && defObj.items.$ref) {
                     defObj.items.type = '$ref';
@@ -64,6 +65,7 @@
                 for (prop in defObj.properties) {
                     var defObjProp = defObj.properties[prop];
                     defObjProp.name = prop;
+                    defObjProp.initialName = prop;
                     if (defObjProp.$ref) {
                         defObjProp.type = "$ref";
                     }
@@ -84,6 +86,7 @@
                 }
 
                 delete defObj.name;
+                delete defObj.initialName;
 
                 if (defObj.type == 'array') {
                     delete defObj.properties;
@@ -99,7 +102,15 @@
 
                     for (prop in defObj.properties) {
                         var defObjProp = defObj.properties[prop];
+                        if (prop != defObjProp.name) {
+                            //Property name was changed; change the JSON key name from prop to defObjProp.name
+                            defObj.properties[defObjProp.name] = defObjProp;
+                            delete defObj.properties[prop];
+                        }
+
                         delete defObjProp.name;
+                        delete defObjProp.initialName;
+
                         if (defObjProp.type != '$ref') {
                             delete defObjProp.$ref;
                         }
@@ -118,16 +129,53 @@
             }
         };
 
+        $scope.changeRefOfDefinitions = function (obj) {
+            for (var def in obj.definitions) {
+                var defObj = obj.definitions[def];
+                if (defObj.type == 'array') {
+                    if (defObj.items.type == '$ref') {
+                        $scope.possiblyChangeRef(obj, defObj.items);
+                    }
+                }
+                else if (defObj.type == 'object') {
+                    for (prop in defObj.properties) {
+                        var defObjProp = defObj.properties[prop];
+                        if (defObjProp.type == '$ref') {
+                            $scope.possiblyChangeRef(obj, defObjProp);
+                        }
+                        else if (defObjProp.type == 'array') {
+                            if (defObjProp.items.type == '$ref') {
+                                $scope.possiblyChangeRef(obj, defObjProp.items);
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        $scope.onlyDefinitionName = function (ref) {
+            var prefixLength = "#/definitions/".length;
+            return ref.substring(prefixLength);
+        };
+        $scope.possiblyChangeRef = function (obj, withRef) {
+            var definition = obj.definitions[$scope.onlyDefinitionName(withRef.$ref)];
+            var fullDefinitionName = $scope.prefixDef(definition.name);
+            if (fullDefinitionName != withRef.$ref) {
+                withRef.$ref = fullDefinitionName;
+            }
+        };
+
+        $scope.changeRefOfChangedDtoNames = function (obj) {
+            $scope.changeRefOfDefinitions(obj);
+
+        };
+
         $scope.preProcessSave = function (obj) {
             $scope.removeHashKeys(obj.tags);
 
+            $scope.changeRefOfChangedDtoNames(obj);
             $scope.cleanDefinitionIntermediateData(obj);
             $scope.cleanPathsIntermediateData(obj);
-        };
-
-        $scope.setPropRef = function (prop, val) {
-            prop.$ref = val;
-            alert(prop.$ref);
         };
 
         $scope.processPaths = function (obj) {
@@ -138,10 +186,6 @@
 
         $scope.cleanPathsIntermediateData = function (obj) {
 
-        };
-
-        $scope.isSelected = function (ref, key) {
-            return ref === '#/definitions/' + key;
         };
 
         $scope.prefixDef = function (def) {
@@ -191,6 +235,7 @@
             }
 
             $scope.swaggerObject.definitions[newName] = {
+                initialName: newName,
                 name: newName,
                 type: "object",
                 properties: {}
@@ -204,6 +249,13 @@
                 description: "descr",
                 type: "integer"
             };
+        };
+
+        $scope.deleteDefinition = function (def) {
+            delete $scope.swaggerObject.definitions[def.initialName];
+        };
+        $scope.deleteProperty = function (def, prop) {
+            delete def.properties[prop.initialName];
         };
     });
 })();
