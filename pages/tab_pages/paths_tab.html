@@ -1,1 +1,50 @@
-<!-- todo -->
+<div>
+    <h3>Paths</h3>
+
+<div ng-repeat="path in swaggerObject.paths">
+    <span>Name: </span> <input type="text" ng-model="path.name">
+    <div ng-repeat="method in swaggerObject.httpMethods">
+        <span>Method: </span> <select required ng-model="method.name" ng-options="m for m in httpMethods"></select>
+        <span>Summary: </span> <input type="text" ng-model="method.summary">
+        <span>Produces: </span> <select required ng-model="method.produces" ng-options="p for p in contentTypes"></select>
+        <h3>Tags</h3>
+        <!-- todo tags -->
+
+        <h3>Parameters</h3>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>In</th>
+                <th>Description</th>
+                <th>Required</th>
+                <th>Type</th>
+                <th>Actions</th>
+            </tr>
+            <tr ng-repeat="">
+
+            </tr>
+        </table>
+
+        <h3>Responses</h3>
+        <table>
+            <tr>
+                <th>Code</th>
+                <th>Description</th>
+                <th>Schema</th>
+            </tr>
+            <tr ng-repeat="response in path.responses">
+                <td><input type="number" required min="1" max="1000" ng-model="response.name"></td>
+                <td><input type="text" ng-model="response.description"></td>
+                <td>
+                    <select ng-model="response.schema.$ref" required>
+                        <option ng-repeat="(key, val) in swaggerObject.definitions" value="{{prefixDef(key)}}">
+                            {{val.name}}
+                        </option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <button type="button" ng-click="addResponseCode(path)">Add response</button>
+    </div>
+</div>
+</div>

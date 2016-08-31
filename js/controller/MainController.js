@@ -17,6 +17,10 @@
 
         $scope.innerPropertyTypes = ["$ref", "integer", "number", "string", "boolean"];
 
+        $scope.httpMethods = ["get", "post", "put", "delete"];
+
+        $scope.contentTypes = ["application/json"];
+
 
         $scope.setCurrentTab = function (tab) {
             $scope.currentTab = tab;
@@ -262,5 +266,27 @@
         $scope.deleteProperty = function (def, prop) {
             delete def.properties[prop.initialName];
         };
+
+        $scope.addResponseCode = function (path) {
+            var newCode = $scope.prompt("Please choose the code", "1");
+            if (!$scope.isNumeric(newCode)) {
+                alert("Please enter a number");
+            }
+            else if (path.responses[newCode]) {
+                alert("There's already such response code in the list.");
+            }
+            else {
+                path.responses[newCode] = {
+                    initialCode: newCode,
+                    code: newCode,
+                    description: "",
+                    schema: {$ref: $scope.swaggerObject.definitions[0]}
+                };
+            }
+        };
+
+        $scope.isNumeric = function (n) {
+            return !isNaN(parseFloat(n)) && isFinite(n);
+        }
     });
 })();
