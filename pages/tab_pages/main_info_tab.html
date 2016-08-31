@@ -3,19 +3,19 @@
     <table>
         <tr>
             <td>API version:</td>
-            <td><input type="text" ng-model="swaggerObject.info.version"></td>
+            <td><input type="text" required ng-model="swaggerObject.info.version"></td>
         </tr>
         <tr>
             <td>API title:</td>
-            <td><input type="text" ng-model="swaggerObject.info.title"></td>
+            <td><input type="text" required ng-model="swaggerObject.info.title"></td>
         </tr>
         <tr>
             <td>Host:</td>
-            <td><input type="text" ng-model="swaggerObject.host"></td>
+            <td><input type="text" required ng-model="swaggerObject.host"></td>
         </tr>
         <tr>
             <td>Base path:</td>
-            <td><input type="text" ng-model="swaggerObject.basePath"></td>
+            <td><input type="text" required ng-model="swaggerObject.basePath"></td>
         </tr>
     </table>
 
@@ -27,7 +27,7 @@
             <th>Actions</th>
         </tr>
         <tr ng-repeat="tag in swaggerObject.tags">
-            <td><input type="text" ng-model="tag.name"></td>
+            <td><input type="text" required ng-model="tag.name"></td>
             <td><input type="text" ng-model="tag.description"></td>
             <td><button type="button" ng-click="removeTag($index)">Remove tag</button></td>
         </tr>

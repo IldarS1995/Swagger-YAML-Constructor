@@ -1,16 +1,16 @@
 <div>
     <div ng-repeat="def in swaggerObject.definitions" style="border-bottom: 1px solid black;">
-        <span>Name: </span> <input type="text" ng-model="def.name"> <br/>
+        <span>Name: </span> <input type="text" required ng-model="def.name"> <br/>
         <span>Type: </span>
-        <select ng-model="def.type" ng-options="type for type in definitionTypes"></select> <br/>
+        <select ng-model="def.type" required ng-options="type for type in definitionTypes"></select> <br/>
 
         <div ng-switch="def.type">
 
             <div ng-switch-when="array">
-                <select ng-model="def.items.type"
+                <select ng-model="def.items.type" required
                         ng-options="type for type in innerPropertyTypes"></select>
                 <div ng-if="def.items.type == '$ref'">
-                    <select ng-model="def.items.$ref">
+                    <select ng-model="def.items.$ref" required>
                         <option ng-repeat="(key, val) in swaggerObject.definitions" value="{{prefixDef(key)}}">
                             {{val.name}}
                         </option>
@@ -30,28 +30,28 @@
                     </tr>
                     <tr ng-repeat="prop in def.properties">
                         <td>
-                            <input type="text" ng-model="prop.name">
+                            <input type="text" required ng-model="prop.name">
                         </td>
                         <td>
                             <input type="text" ng-model="prop.description">
                         </td>
                         <td>
-                            <select ng-model="prop.type" ng-options="type for type in defPropertyTypes"></select>
+                            <select ng-model="prop.type" required ng-options="type for type in defPropertyTypes"></select>
                         </td>
                         <td>
                             <div ng-switch="prop.type">
                                 <div ng-switch-when="$ref">
-                                    <select ng-model="prop.$ref">
+                                    <select ng-model="prop.$ref" required>
                                         <option ng-repeat="(key, val) in swaggerObject.definitions" value="{{prefixDef(key)}}">
                                             {{val.name}}
                                         </option>
                                     </select>
                                 </div>
                                 <div ng-switch-when="array">
-                                    <select ng-model="prop.items.type"
+                                    <select ng-model="prop.items.type" required
                                             ng-options="type for type in innerPropertyTypes"></select>
                                     <div ng-if="prop.items.type == '$ref'">
-                                        <select ng-model="prop.items.$ref">
+                                        <select ng-model="prop.items.$ref" required>
                                             <option ng-repeat="(key, val) in swaggerObject.definitions" value="{{prefixDef(key)}}">
                                                 {{val.name}}
                                             </option>

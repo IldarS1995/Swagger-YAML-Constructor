@@ -1,3 +1,6 @@
-<button style="margin-top: 20px;" type="button" ng-click="saveAsYaml()" ng-disabled="!swaggerObject">
-    Save as YAML
-</button>
+<div style="margin-top: 20px;">
+<span ng-if="swaggerObject && !form.$valid" style="color: red;">
+    All fields (exception Description) must be non-empty.
+</span>
+<input type="submit" value="Save as YAML" ng-hide="!swaggerObject || !form.$valid">
+</div>

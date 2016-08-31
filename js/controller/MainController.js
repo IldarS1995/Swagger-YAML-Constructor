@@ -210,6 +210,10 @@
             $scope.swaggerObject.tags.splice(index, 1);
         };
         $scope.addTag = function () {
+            if (!$scope.swaggerObject.tags) {
+                $scope.swaggerObject.tags = [];
+            }
+
             $scope.swaggerObject.tags.push({name: "", description: ""});
         };
 
@@ -245,6 +249,7 @@
             var newName = "property_" + Math.random();
 
             def.properties[newName] = {
+                initialName: newName,
                 name: newName,
                 description: "descr",
                 type: "integer"
