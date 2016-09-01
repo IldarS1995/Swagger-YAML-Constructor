@@ -3,10 +3,14 @@
 
 <div ng-repeat="path in swaggerObject.paths">
     <span>Name: </span> <input type="text" ng-model="path.name">
-    <div ng-repeat="method in swaggerObject.httpMethods">
+
+    <div ng-repeat="method in path.httpMethods">
+
         <span>Method: </span> <select required ng-model="method.name" ng-options="m for m in httpMethods"></select>
         <span>Summary: </span> <input type="text" ng-model="method.summary">
-        <span>Produces: </span> <select required ng-model="method.produces" ng-options="p for p in contentTypes"></select>
+        <span>Description: </span> <textarea ng-model="method.description"></textarea>
+        <span>Produces: </span> <select ng-model="method.produces" ng-options="p for p in contentTypes"></select>
+
         <h3>Tags</h3>
         <!-- todo tags -->
 
@@ -20,10 +24,25 @@
                 <th>Type</th>
                 <th>Actions</th>
             </tr>
-            <tr ng-repeat="">
-
+            <tr ng-repeat="param in method.parameters">
+                <td><input required type="text" ng-model="param.name"></td>
+                <td><select required ng-model="param.in" ng-options="i for i in paramIn"></select></td>
+                <td><input type="text" ng-model="param.description"></td>
+                <td><input type="checkbox" ng-model="param.required"></td>
+                <td>
+                    <select required ng-model="param.type" ng-options="type for type in defPropertyTypes"></select>
+                    <div ng-if="param.type == '$ref'">
+                        <select ng-model="param.schema.$ref" required>
+                            <option ng-repeat="(key, val) in swaggerObject.definitions" value="{{prefixDef(key)}}">
+                                {{val.name}}
+                            </option>
+                        </select>
+                    </div>
+                </td>
+                <td><button type="button" ng-click="deleteParam(method, param.initialName)">Delete</button></td>
             </tr>
         </table>
+        <button type="button" ng-click="addParam(method)">Add new parameter</button>
 
         <h3>Responses</h3>
         <table>
@@ -31,9 +50,10 @@
                 <th>Code</th>
                 <th>Description</th>
                 <th>Schema</th>
+                <th>Actions</th>
             </tr>
-            <tr ng-repeat="response in path.responses">
-                <td><input type="number" required min="1" max="1000" ng-model="response.name"></td>
+            <tr ng-repeat="response in method.responses">
+                <td><input type="number" required min="100" max="899" ng-model="response.name"></td>
                 <td><input type="text" ng-model="response.description"></td>
                 <td>
                     <select ng-model="response.schema.$ref" required>
@@ -42,9 +62,16 @@
                         </option>
                     </select>
                 </td>
+                <td><button type="button" ng-click="deleteResponse(method, response)">Delete</button></td>
             </tr>
         </table>
-        <button type="button" ng-click="addResponseCode(path)">Add response</button>
-    </div>
-</div>
+        <button type="button" ng-click="addResponseCode(method)">Add response</button>
+        <button type="button" ng-click="deleteHttpMethod(path, method.initialName)">Delete method</button>
+
+    </div> <!-- Method -->
+    <button type="button" ng-click="addHttpMethod(path)">Add new method</button>
+    <button type="button" ng-click="deletePath(path)">Delete path</button>
+
+</div> <!-- Path -->
+<button type="button" ng-click="addNewPath()">Add new path</button>
 </div>

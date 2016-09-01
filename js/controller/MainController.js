@@ -21,6 +21,8 @@
 
         $scope.contentTypes = ["application/json"];
 
+        $scope.paramIn = ["header", "body", "query", "path"];
+
 
         $scope.setCurrentTab = function (tab) {
             $scope.currentTab = tab;
@@ -267,16 +269,19 @@
             delete def.properties[prop.initialName];
         };
 
-        $scope.addResponseCode = function (path) {
-            var newCode = $scope.prompt("Please choose the code", "1");
+        $scope.deleteResponse = function (method, response) {
+            delete method.responses[response.initialName];
+        };
+        $scope.addResponseCode = function (method) {
+            var newCode = prompt("Please choose the code", "1");
             if (!$scope.isNumeric(newCode)) {
                 alert("Please enter a number");
             }
-            else if (path.responses[newCode]) {
+            else if (method.responses[newCode]) {
                 alert("There's already such response code in the list.");
             }
             else {
-                path.responses[newCode] = {
+                method.responses[newCode] = {
                     initialCode: newCode,
                     code: newCode,
                     description: "",
@@ -287,6 +292,69 @@
 
         $scope.isNumeric = function (n) {
             return !isNaN(parseFloat(n)) && isFinite(n);
-        }
+        };
+
+        $scope.deletePath = function (path) {
+            delete $scope.swaggerObject.paths[path.initialName];
+        };
+        $scope.addNewPath = function () {
+            var name = prompt("Please choose the URI", "/path");
+            if ($scope.swaggerObject.paths[name]) {
+                alert("There's already such parameter in the list.");
+            }
+            else {
+                $scope.swaggerObject.paths[name] = {
+                    name: name,
+                    initialName: name,
+                    httpMethods: []
+                };
+            }
+        };
+
+        $scope.deleteParam = function (method, initialName) {
+            delete method.parameters[initialName];
+        };
+        $scope.addParam = function (method) {
+            var name = prompt("Please choose the name", "Param");
+            if (method.parameters[name]) {
+                alert("There's already such parameter in the list.");
+            }
+            else {
+                method.parameters[name] = {
+                    initialName: name,
+                    name: name,
+                    in: "query",
+                    required: false,
+                    description: "",
+                    type: "integer"
+                };
+            }
+        };
+
+        $scope.deleteHttpMethod = function (path, initialName) {
+            delete path.methods[initialName];
+        };
+        $scope.addHttpMethod = function (path)  {
+            var freeMethod = $scope.findFreeMethod(path);
+            if (!freeMethod) {
+                alert("I'm afraid there're no more free HTTP methods left.");
+            }
+
+            //...
+        };
+        $scope.findFreeMethod = function (path) {
+            if (path.methods.size >= $scope.httpMethods.size) {
+                return null;
+            }
+
+            for (i in $scope.httpMethods) {
+                var meth = $scope.httMethods[i];
+                if (!path.methods[meth]) {
+                    return meth;
+                }
+            }
+
+            return null;
+        };
     });
 })();
