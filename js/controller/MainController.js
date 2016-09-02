@@ -186,8 +186,33 @@
 
         $scope.processPaths = function (obj) {
             for (path in obj.paths) {
-                obj.paths[path].path = path;
+                var pathObj = obj.paths[path];
+
+                pathObj.name = path;
+                pathObj.initialName = path;
+
+                for (meth in pathObj) {
+                    var httpMethod = pathObj[meth];
+                    httpMethod.name = meth;
+                    httpMethod.initialName = meth;
+
+                    for (param in httpMethod.parameters) {
+                        var paramObj = httpMethod.parameters[param];
+                        paramObj.name = param;
+                        paramObj.initialName = param;
+                        if (paramObj.schema.$ref) {
+                            paramObj.type = "$ref";
+                        }
+                    }
+
+                    for (response in httpMethod.responses) {
+                        var responseObj = httpMethod.responses[response];
+                        responseObj.name = response;
+                        responseObj.initialName = response;
+                    }
+                }
             }
+
         };
 
         $scope.cleanPathsIntermediateData = function (obj) {
@@ -340,21 +365,49 @@
                 alert("I'm afraid there're no more free HTTP methods left.");
             }
 
-            //...
+            path[freeMethod] = {
+                method: freeMethod,
+                initialMethod: freeMethod,
+                summary: "",
+                description: "",
+                produces: $scope.contentTypes[0],
+                tags: [],
+                parameters: [],
+                responses: []
+            };
         };
         $scope.findFreeMethod = function (path) {
-            if (path.methods.size >= $scope.httpMethods.size) {
+            if ($scope.countOfFields(path) >= $scope.httpMethods.length) {
                 return null;
             }
 
             for (i in $scope.httpMethods) {
-                var meth = $scope.httMethods[i];
-                if (!path.methods[meth]) {
+                var meth = $scope.httpMethods[i];
+                if (!path[meth]) {
                     return meth;
                 }
             }
 
             return null;
+        };
+
+        $scope.countOfFields = function (obj) {
+            var i = 0;
+            for (field in obj) {
+                if (obj.hasOwnProperty(field)) {
+                    i++;
+                }
+            }
+
+            return i;
+        };
+
+        $scope.selectedTag = null;
+        $scope.removeTagFromMethod = function (method, tagIdx) {
+            method.tags.splice(tagIdx, 1);
+        };
+        $scope.addTagToMethod = function (method) {
+            method.tags.push($scope.selectedTag.name);
         };
     });
 })();

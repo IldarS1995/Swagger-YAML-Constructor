@@ -4,7 +4,7 @@
 <div ng-repeat="path in swaggerObject.paths">
     <span>Name: </span> <input type="text" ng-model="path.name">
 
-    <div ng-repeat="method in path.httpMethods">
+    <div ng-repeat="(methName, method) in path">
 
         <span>Method: </span> <select required ng-model="method.name" ng-options="m for m in httpMethods"></select>
         <span>Summary: </span> <input type="text" ng-model="method.summary">
@@ -12,7 +12,11 @@
         <span>Produces: </span> <select ng-model="method.produces" ng-options="p for p in contentTypes"></select>
 
         <h3>Tags</h3>
-        <!-- todo tags -->
+        <span ng-repeat="tag in method.tags">
+            {{tag}} <a ng-click="removeTagFromMethod(method, $index)" tooltip="Remove the tag">X</a>
+        </span>
+        <select ng-model="selectedTag" ng-options="tag in swaggerObject.tags"></select>
+        <button ng-show="selectedTag" type="button" ng-click="addTagToMethod(method)">Add tag</button>
 
         <h3>Parameters</h3>
         <table>
