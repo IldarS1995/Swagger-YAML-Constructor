@@ -230,6 +230,10 @@
                             responseObj.name = 99; //The default code
                             responseObj.initialName = response;
                         }
+
+                        if (!responseObj.schema.type) {
+                            responseObj.schema.type = "object";
+                        }
                     }
                 }
             }
@@ -241,7 +245,7 @@
         };
 
         $scope.cleanPathsIntermediateData = function (obj) {
-
+            //todo remove response.schema.type if it's not array
         };
 
         $scope.prefixDef = function (def) {
@@ -391,19 +395,19 @@
                 alert("There's already such parameter in the list.");
             }
             else {
-                method.parameters[name] = {
+                method.parameters.push({
                     initialName: name,
                     name: name,
                     in: "query",
                     required: false,
                     description: "",
                     type: "integer"
-                };
+                });
             }
         };
 
         $scope.deleteHttpMethod = function (path, initialName) {
-            delete path.methods[initialName];
+            delete path[initialName];
         };
         $scope.addHttpMethod = function (path)  {
             var freeMethod = $scope.findFreeMethod(path);
@@ -412,8 +416,8 @@
             }
 
             path[freeMethod] = {
-                method: freeMethod,
-                initialMethod: freeMethod,
+                name: freeMethod,
+                initialName: freeMethod,
                 summary: "",
                 description: "",
                 produces: [$scope.contentTypes[0]],
@@ -449,12 +453,12 @@
             return i;
         };
 
-        $scope.selectedTag = null;
+        $scope.selectedTag = {selected: null};
         $scope.removeTagFromMethod = function (method, tagIdx) {
             method.tags.splice(tagIdx, 1);
         };
         $scope.addTagToMethod = function (method) {
-            method.tags.push($scope.selectedTag.name);
+            method.tags.push($scope.selectedTag.selected.name);
         };
     });
 })();

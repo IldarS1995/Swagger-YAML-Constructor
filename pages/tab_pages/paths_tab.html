@@ -32,8 +32,8 @@
         <span ng-repeat="tag in method.tags">
             {{tag}} <a ng-click="removeTagFromMethod(method, $index)" tooltip="Remove the tag">X</a>
         </span> <br />
-        <select ng-model="selectedTag" ng-options="tag.name for tag in swaggerObject.tags"></select>
-        <button ng-show="selectedTag" type="button" ng-click="addTagToMethod(method)">Add tag</button>
+        <select ng-model="selectedTag.selected" ng-options="tag.name for tag in swaggerObject.tags"></select>
+        <button ng-show="selectedTag.selected" type="button" ng-click="addTagToMethod(method)">Add tag</button>
 
         <h3>Parameters</h3>
         <table border="1">
@@ -70,6 +70,7 @@
             <tr>
                 <th>Code</th>
                 <th>Description</th>
+                <th>Schema type</th>
                 <th>Schema</th>
                 <th>Actions</th>
             </tr>
@@ -77,11 +78,21 @@
                 <td><input type="number" required min="99" max="899" ng-model="response.name"></td>
                 <td><input type="text" ng-model="response.description"></td>
                 <td>
-                    <select ng-model="response.schema.$ref" required>
-                        <option ng-repeat="(key, val) in swaggerObject.definitions" value="{{prefixDef(key)}}">
-                            {{val.name}}
-                        </option>
-                    </select>
+                    <select ng-model="response.schema.type" ng-options="type for type in definitionTypes"></select>
+                </td>
+                <td>
+                    <div ng-switch="response.schema.type">
+                        <select ng-switch-when="array" ng-model="response.schema.items.$ref" required>
+                            <option ng-repeat="(key, val) in swaggerObject.definitions" value="{{prefixDef(key)}}">
+                                {{val.name}}
+                            </option>
+                        </select>
+                        <select ng-switch-default ng-model="response.schema.$ref" required>
+                            <option ng-repeat="(key, val) in swaggerObject.definitions" value="{{prefixDef(key)}}">
+                                {{val.name}}
+                            </option>
+                        </select>
+                    </div>
                 </td>
                 <td><button type="button" ng-click="deleteResponse(method, response)">Delete</button></td>
             </tr>
