@@ -186,33 +186,58 @@
 
         $scope.processPaths = function (obj) {
             for (path in obj.paths) {
+                if (!obj.paths.hasOwnProperty(path)) {
+                    continue;
+                }
+
                 var pathObj = obj.paths[path];
 
                 pathObj.name = path;
                 pathObj.initialName = path;
 
                 for (meth in pathObj) {
+                    if (!pathObj.hasOwnProperty(meth) || !$scope.isHttpMethod(meth)) {
+                        continue;
+                    }
+
                     var httpMethod = pathObj[meth];
                     httpMethod.name = meth;
                     httpMethod.initialName = meth;
 
-                    for (param in httpMethod.parameters) {
-                        var paramObj = httpMethod.parameters[param];
-                        paramObj.name = param;
-                        paramObj.initialName = param;
-                        if (paramObj.schema.$ref) {
+                    if (!httpMethod.produces) {
+                        httpMethod.produces = [""];
+                    }
+
+                    for (idx in httpMethod.parameters) {
+                        var paramObj = httpMethod.parameters[idx];
+                        paramObj.initialName = paramObj.name;
+                        if (paramObj.schema && paramObj.schema.$ref) {
                             paramObj.type = "$ref";
                         }
                     }
 
                     for (response in httpMethod.responses) {
+                        if (!httpMethod.responses.hasOwnProperty(response)) {
+                            continue;
+                        }
+
                         var responseObj = httpMethod.responses[response];
-                        responseObj.name = response;
-                        responseObj.initialName = response;
+                        if ($scope.isNumeric(response)) {
+                            responseObj.name = parseInt(response);
+                            responseObj.initialName = parseInt(response);
+                        }
+                        else {
+                            responseObj.name = 99; //The default code
+                            responseObj.initialName = response;
+                        }
                     }
                 }
             }
 
+        };
+
+        $scope.isHttpMethod = function (meth) {
+            return $scope.httpMethods.indexOf(meth) > -1;
         };
 
         $scope.cleanPathsIntermediateData = function (obj) {
@@ -233,12 +258,33 @@
                 paths: [],
                 definitions: [],
                 schemes: "http",
-                produces: "application/json"
+                produces: ["application/json"]
             };
         };
 
         $scope.removeTag = function (index) {
-            $scope.swaggerObject.tags.splice(index, 1);
+            var obj = $scope.swaggerObject;
+            var tag = obj.tags[index].name;
+            obj.tags.splice(index, 1);
+
+            //Remove this tag from each path tag list
+            for (path in obj.paths) {
+                if (!obj.paths.hasOwnProperty(path)) {
+                    continue;
+                }
+
+                var pathObj = obj.paths[path];
+                for (meth in pathObj) {
+                    if (!pathObj.hasOwnProperty(meth)) {
+                        continue;
+                    }
+
+                    var methObj = pathObj[meth];
+                    if (methObj.tags && (idx = methObj.tags.indexOf(tag)) > -1) {
+                        methObj.tags.splice(idx, 1);
+                    }
+                }
+            }
         };
         $scope.addTag = function () {
             if (!$scope.swaggerObject.tags) {
@@ -370,7 +416,8 @@
                 initialMethod: freeMethod,
                 summary: "",
                 description: "",
-                produces: $scope.contentTypes[0],
+                produces: [$scope.contentTypes[0]],
+                consumes: [],
                 tags: [],
                 parameters: [],
                 responses: []

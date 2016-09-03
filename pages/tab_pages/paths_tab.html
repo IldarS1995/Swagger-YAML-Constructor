@@ -1,25 +1,42 @@
 <div>
     <h3>Paths</h3>
 
-<div ng-repeat="path in swaggerObject.paths">
-    <span>Name: </span> <input type="text" ng-model="path.name">
+<div ng-repeat="path in swaggerObject.paths" style="border-bottom: 5px solid black; margin-top: 15px;">
+    <div style="margin-bottom: 25px;">
+        <span style="font-size: 16px; font-weight: bold;">Name: </span> <input type="text" ng-model="path.name">
+    </div>
 
-    <div ng-repeat="(methName, method) in path">
+    <div ng-repeat="(methName, method) in path" ng-if="isHttpMethod(methName)"
+         style="border-bottom: 1px solid black; margin-bottom: 20px;">
 
-        <span>Method: </span> <select required ng-model="method.name" ng-options="m for m in httpMethods"></select>
-        <span>Summary: </span> <input type="text" ng-model="method.summary">
-        <span>Description: </span> <textarea ng-model="method.description"></textarea>
-        <span>Produces: </span> <select ng-model="method.produces" ng-options="p for p in contentTypes"></select>
+        <table>
+            <tr>
+                <td>Method:</td>
+                <td><select required ng-model="method.name" ng-options="m for m in httpMethods"></select></td>
+            </tr>
+            <tr>
+                <td>Summary:</td>
+                <td><input type="text" ng-model="method.summary" style="width: 400px;"></td>
+            </tr>
+            <tr>
+                <td>Description:</td>
+                <td><textarea ng-model="method.description" rows="6" cols="60"></textarea></td>
+            </tr>
+            <tr>
+                <td>Produces:</td>
+                <td><select ng-model="method.produces[0]" ng-options="p for p in contentTypes"></select></td>
+            </tr>
+        </table>
 
         <h3>Tags</h3>
         <span ng-repeat="tag in method.tags">
             {{tag}} <a ng-click="removeTagFromMethod(method, $index)" tooltip="Remove the tag">X</a>
-        </span>
-        <select ng-model="selectedTag" ng-options="tag in swaggerObject.tags"></select>
+        </span> <br />
+        <select ng-model="selectedTag" ng-options="tag.name for tag in swaggerObject.tags"></select>
         <button ng-show="selectedTag" type="button" ng-click="addTagToMethod(method)">Add tag</button>
 
         <h3>Parameters</h3>
-        <table>
+        <table border="1">
             <tr>
                 <th>Name</th>
                 <th>In</th>
@@ -32,7 +49,7 @@
                 <td><input required type="text" ng-model="param.name"></td>
                 <td><select required ng-model="param.in" ng-options="i for i in paramIn"></select></td>
                 <td><input type="text" ng-model="param.description"></td>
-                <td><input type="checkbox" ng-model="param.required"></td>
+                <td><input type="checkbox" ng-model="param.required" style="width: 100%;"></td>
                 <td>
                     <select required ng-model="param.type" ng-options="type for type in defPropertyTypes"></select>
                     <div ng-if="param.type == '$ref'">
@@ -49,7 +66,7 @@
         <button type="button" ng-click="addParam(method)">Add new parameter</button>
 
         <h3>Responses</h3>
-        <table>
+        <table border="1">
             <tr>
                 <th>Code</th>
                 <th>Description</th>
@@ -57,7 +74,7 @@
                 <th>Actions</th>
             </tr>
             <tr ng-repeat="response in method.responses">
-                <td><input type="number" required min="100" max="899" ng-model="response.name"></td>
+                <td><input type="number" required min="99" max="899" ng-model="response.name"></td>
                 <td><input type="text" ng-model="response.description"></td>
                 <td>
                     <select ng-model="response.schema.$ref" required>

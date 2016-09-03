@@ -1,5 +1,5 @@
 <div>
-    <div ng-repeat="def in swaggerObject.definitions" style="border-bottom: 1px solid black;">
+    <div ng-repeat="def in swaggerObject.definitions" style="margin-top: 15px; border-bottom: 1px solid black;">
         <span>Name: </span> <input type="text" required ng-model="def.name"> <br/>
         <span>Type: </span>
         <select ng-model="def.type" required ng-options="type for type in definitionTypes"></select> <br/>

@@ -20,9 +20,12 @@
 </head>
 
 <body ng-controller="mainController">
-<h2>Swagger YAML Constructor</h2>
 
-<div ng-include="'load_file.html'"></div>
+<div style="margin-left: 10px;">
+    <h2>Swagger YAML Constructor</h2>
+
+    <div ng-include="'load_file.html'"></div>
+</div>
 
 <form name="form" ng-submit="saveAsYaml()">
     <ul class="nav nav-tabs">
@@ -30,7 +33,7 @@
             <a ng-click="setCurrentTab(tab)">{{tab.name}}</a>
         </li>
     </ul>
-    <div ng-include="currentTab.page" ng-show="swaggerObject"></div>
+    <div ng-include="currentTab.page" style="margin-left: 20px;" ng-show="swaggerObject"></div>
 
     <div ng-include="'save_yaml.html'"></div>
 </form>
