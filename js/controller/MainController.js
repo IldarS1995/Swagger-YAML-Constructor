@@ -6,8 +6,8 @@
 
         $scope.tabs = [
             {name: "General information", page: "tab_pages/main_info_tab.html"},
-            {name: "Paths", page: "tab_pages/paths_tab.html"},
-            {name: "Definitions", page: "tab_pages/definition_tab.html"}
+            {name: "Definitions", page: "tab_pages/definition_tab.html"},
+            {name: "Paths", page: "tab_pages/paths_tab.html"}
         ];
         $scope.currentTab = $scope.tabs[0];
 
@@ -248,6 +248,7 @@
                     delete obj.paths[path];
                 }
                 delete pathObj.name;
+                delete pathObj.initialName;
 
                 for (var meth in pathObj) {
                     if (!pathObj.hasOwnProperty(meth) || !$scope.isHttpMethod(meth)) {
@@ -259,9 +260,11 @@
                     if (meth != httpMethod.name) {
                         //Method changed
                         pathObj[httpMethod.name] = httpMethod;
+
                         delete pathObj[meth];
                     }
                     delete httpMethod.name;
+                    delete httpMethod.initialName;
 
                     if (httpMethod.produces
                         && (httpMethod.produces.length == 0 || httpMethod.produces[0] == '')) {
@@ -290,10 +293,21 @@
                             delete httpMethod.responses[response];
                         }
                         delete responseObj.name;
+                        delete responseObj.initialName;
 
-                        if (response.schema.type == "object") {
-                            delete response.schema.type;
+                        if (responseObj.schema) {
+                            if (responseObj.schema.type == "object") {
+                                delete responseObj.schema.type;
+                            }
+                            else if (responseObj.schema.type == "array") {
+                                delete responseObj.schema.$ref;
+                            }
                         }
+                    }
+
+                    if (httpMethod.responses[$scope.minCode]) {
+                        httpMethod.responses["default"] = httpMethod.responses[$scope.minCode];
+                        delete httpMethod.responses[$scope.minCode];
                     }
                 }
             }
@@ -352,14 +366,20 @@
             $scope.swaggerObject = {
                 swagger: "2.0",
                 info: {},
-                host: "",
-                basePath: "",
+                host: "api.com",
+                basePath: "/api",
                 tags: [],
-                paths: [],
-                definitions: [],
-                schemes: "http",
+                paths: {},
+                definitions: {},
+                schemes: ["http"],
                 produces: ["application/json"]
             };
+        };
+
+        $scope.paramTypeChanged = function (param) {
+            if (param.type == "$ref") {
+                param.in = "body";
+            }
         };
 
         $scope.removeTag = function (index) {
@@ -471,8 +491,8 @@
                 }
 
                 method.responses[code] = {
-                    initialName: code,
                     name: code,
+                    initialName: code,
                     description: "",
                     schema: {
                         type: "object",
@@ -498,7 +518,6 @@
                 $scope.swaggerObject.paths[name] = {
                     name: name,
                     initialName: name,
-                    httpMethods: []
                 };
             }
         };
@@ -513,7 +532,6 @@
             }
             else {
                 method.parameters.push({
-                    initialName: name,
                     name: name,
                     in: "query",
                     required: false,
