@@ -60,7 +60,7 @@
                         </select>
                     </div>
                 </td>
-                <td><button type="button" ng-click="deleteParam(method, param.initialName)">Delete</button></td>
+                <td><button type="button" ng-click="deleteParam(method, $index)">Delete</button></td>
             </tr>
         </table>
         <button type="button" ng-click="addParam(method)">Add new parameter</button>
@@ -75,7 +75,7 @@
                 <th>Actions</th>
             </tr>
             <tr ng-repeat="response in method.responses">
-                <td><input type="number" required min="99" max="899" ng-model="response.name"></td>
+                <td><input type="number" required min="{{minCode}}" max="{{maxCode}}" ng-model="response.name"></td>
                 <td><input type="text" ng-model="response.description"></td>
                 <td>
                     <select ng-model="response.schema.type" ng-options="type for type in definitionTypes"></select>
@@ -98,7 +98,7 @@
             </tr>
         </table>
         <button type="button" ng-click="addResponseCode(method)">Add response</button>
-        <button type="button" ng-click="deleteHttpMethod(path, method.initialName)">Delete method</button>
+        <button type="button" ng-click="deleteHttpMethod(path, method.name)">Delete method</button>
 
     </div> <!-- Method -->
     <button type="button" ng-click="addHttpMethod(path)">Add new method</button>

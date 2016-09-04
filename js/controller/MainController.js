@@ -19,7 +19,7 @@
 
         $scope.httpMethods = ["get", "post", "put", "delete"];
 
-        $scope.contentTypes = ["application/json"];
+        $scope.contentTypes = ["", "application/json"];
 
         $scope.paramIn = ["header", "body", "query", "path"];
 
@@ -173,7 +173,7 @@
 
         $scope.changeRefOfChangedDtoNames = function (obj) {
             $scope.changeRefOfDefinitions(obj);
-
+            $scope.changeRefOfPaths(obj);
         };
 
         $scope.preProcessSave = function (obj) {
@@ -185,7 +185,7 @@
         };
 
         $scope.processPaths = function (obj) {
-            for (path in obj.paths) {
+            for (var path in obj.paths) {
                 if (!obj.paths.hasOwnProperty(path)) {
                     continue;
                 }
@@ -193,30 +193,27 @@
                 var pathObj = obj.paths[path];
 
                 pathObj.name = path;
-                pathObj.initialName = path;
 
-                for (meth in pathObj) {
+                for (var meth in pathObj) {
                     if (!pathObj.hasOwnProperty(meth) || !$scope.isHttpMethod(meth)) {
                         continue;
                     }
 
                     var httpMethod = pathObj[meth];
                     httpMethod.name = meth;
-                    httpMethod.initialName = meth;
 
                     if (!httpMethod.produces) {
                         httpMethod.produces = [""];
                     }
 
-                    for (idx in httpMethod.parameters) {
+                    for (var idx in httpMethod.parameters) {
                         var paramObj = httpMethod.parameters[idx];
-                        paramObj.initialName = paramObj.name;
                         if (paramObj.schema && paramObj.schema.$ref) {
                             paramObj.type = "$ref";
                         }
                     }
 
-                    for (response in httpMethod.responses) {
+                    for (var response in httpMethod.responses) {
                         if (!httpMethod.responses.hasOwnProperty(response)) {
                             continue;
                         }
@@ -224,11 +221,9 @@
                         var responseObj = httpMethod.responses[response];
                         if ($scope.isNumeric(response)) {
                             responseObj.name = parseInt(response);
-                            responseObj.initialName = parseInt(response);
                         }
                         else {
                             responseObj.name = 99; //The default code
-                            responseObj.initialName = response;
                         }
 
                         if (!responseObj.schema.type) {
@@ -237,15 +232,116 @@
                     }
                 }
             }
+        };
 
+        $scope.cleanPathsIntermediateData = function (obj) {
+            for (var path in obj.paths) {
+                if (!obj.paths.hasOwnProperty(path)) {
+                    continue;
+                }
+
+                var pathObj = obj.paths[path];
+
+                if (path != pathObj.name) {
+                    //Path URL changed
+                    obj.paths[pathObj.name] = pathObj;
+                    delete obj.paths[path];
+                }
+                delete pathObj.name;
+
+                for (var meth in pathObj) {
+                    if (!pathObj.hasOwnProperty(meth) || !$scope.isHttpMethod(meth)) {
+                        continue;
+                    }
+
+                    var httpMethod = pathObj[meth];
+
+                    if (meth != httpMethod.name) {
+                        //Method changed
+                        pathObj[httpMethod.name] = httpMethod;
+                        delete pathObj[meth];
+                    }
+                    delete httpMethod.name;
+
+                    if (httpMethod.produces
+                        && (httpMethod.produces.length == 0 || httpMethod.produces[0] == '')) {
+                        delete httpMethod.produces;
+                    }
+
+                    for (var idx in httpMethod.parameters) {
+                        var paramObj = httpMethod.parameters[idx];
+                        if (paramObj.type != "$ref") {
+                            delete paramObj.schema;
+                        }
+                        else {
+                            delete paramObj.type;
+                        }
+                    }
+
+                    for (var response in httpMethod.responses) {
+                        if (!httpMethod.responses.hasOwnProperty(response)) {
+                            continue;
+                        }
+
+                        var responseObj = httpMethod.responses[response];
+
+                        if (response != responseObj.name) {
+                            httpMethod.responses[responseObj.name] = responseObj;
+                            delete httpMethod.responses[response];
+                        }
+                        delete responseObj.name;
+
+                        if (response.schema.type == "object") {
+                            delete response.schema.type;
+                        }
+                    }
+                }
+            }
+        };
+
+        $scope.changeRefOfPaths = function (obj) {
+            for (var path in obj.paths) {
+                if (!obj.paths.hasOwnProperty(path)) {
+                    continue;
+                }
+
+                var pathObj = obj.paths[path];
+                for (var meth in pathObj) {
+                    if (!pathObj.hasOwnProperty(meth)) {
+                        continue;
+                    }
+
+                    var methObj = pathObj[meth];
+                    for (var param in methObj.parameters) {
+                        var paramObj = methObj.parameters[param];
+
+                        if (paramObj.type == '$ref') {
+                            $scope.possiblyChangeRef(obj, paramObj.schema);
+                        }
+                        else if (paramObj.type == 'array') {
+                            $scope.possiblyChangeRef(obj, paramObj.schema.items);
+                        }
+                    }
+
+                    for (var response in methObj.responses) {
+                        if (!methObj.responses.hasOwnProperty(response)) {
+                            continue;
+                        }
+
+                        var responseObj = methObj.responses[response];
+                        if (responseObj.schema.type == 'object') {
+                            $scope.possiblyChangeRef(obj, responseObj.schema);
+                        }
+                        else if (responseObj.schema.type == 'array') {
+                            $scope.possiblyChangeRef(obj, responseObj.schema.items);
+                        }
+                    }
+                }
+            }
         };
 
         $scope.isHttpMethod = function (meth) {
             return $scope.httpMethods.indexOf(meth) > -1;
-        };
-
-        $scope.cleanPathsIntermediateData = function (obj) {
-            //todo remove response.schema.type if it's not array
         };
 
         $scope.prefixDef = function (def) {
@@ -344,23 +440,44 @@
             delete def.properties[prop.initialName];
         };
 
+        $scope.minCode = 99;
+        $scope.maxCode = 899;
+
         $scope.deleteResponse = function (method, response) {
             delete method.responses[response.initialName];
         };
         $scope.addResponseCode = function (method) {
-            var newCode = prompt("Please choose the code", "1");
+            var newCode = prompt("Please choose the code", "100");
+            if (!newCode) {
+                return;
+            }
             if (!$scope.isNumeric(newCode)) {
                 alert("Please enter a number");
+                return;
             }
-            else if (method.responses[newCode]) {
+
+            var code = parseInt(newCode);
+            if (code < $scope.minCode || code > $scope.maxCode) {
+                alert("The code you entered is out of the range.");
+            }
+            else if (method.responses[code] || code == 99 && method.responses["default"]) {
                 alert("There's already such response code in the list.");
             }
             else {
-                method.responses[newCode] = {
-                    initialCode: newCode,
-                    code: newCode,
+                var obj = $scope.swaggerObject.definitions;
+                var defNames = $scope.getFieldNames(obj);
+                if (!method.responses) {
+                    method.responses = {};
+                }
+
+                method.responses[code] = {
+                    initialName: code,
+                    name: code,
                     description: "",
-                    schema: {$ref: $scope.swaggerObject.definitions[0]}
+                    schema: {
+                        type: "object",
+                        $ref: defNames.length == 0 ? null : $scope.prefixDef(defNames[0])
+                    }
                 };
             }
         };
@@ -386,12 +503,12 @@
             }
         };
 
-        $scope.deleteParam = function (method, initialName) {
-            delete method.parameters[initialName];
+        $scope.deleteParam = function (method, idx) {
+            method.parameters.splice(idx, 1);
         };
         $scope.addParam = function (method) {
             var name = prompt("Please choose the name", "Param");
-            if (method.parameters[name]) {
+            if ($scope.hasParameter(method.parameters, name)) {
                 alert("There's already such parameter in the list.");
             }
             else {
@@ -404,6 +521,14 @@
                     type: "integer"
                 });
             }
+        };
+        $scope.hasParameter = function (params, name) {
+            for (i in params) {
+                if (params[i].name == name) {
+                    return true;
+                }
+            }
+            return false;
         };
 
         $scope.deleteHttpMethod = function (path, initialName) {
@@ -424,14 +549,10 @@
                 consumes: [],
                 tags: [],
                 parameters: [],
-                responses: []
+                responses: {}
             };
         };
         $scope.findFreeMethod = function (path) {
-            if ($scope.countOfFields(path) >= $scope.httpMethods.length) {
-                return null;
-            }
-
             for (i in $scope.httpMethods) {
                 var meth = $scope.httpMethods[i];
                 if (!path[meth]) {
@@ -442,15 +563,15 @@
             return null;
         };
 
-        $scope.countOfFields = function (obj) {
-            var i = 0;
-            for (field in obj) {
+        $scope.getFieldNames = function (obj) {
+            var arr = [];
+            for (var field in obj) {
                 if (obj.hasOwnProperty(field)) {
-                    i++;
+                    arr.push(field);
                 }
             }
 
-            return i;
+            return arr;
         };
 
         $scope.selectedTag = {selected: null};
