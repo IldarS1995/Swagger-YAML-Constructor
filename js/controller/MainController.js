@@ -267,7 +267,6 @@
                         delete pathObj[meth];
                     }
                     delete httpMethod.name;
-                    delete httpMethod.initialName;
 
                     if (httpMethod.produces
                         && (httpMethod.produces.length == 0 || httpMethod.produces[0] == '')) {
@@ -552,14 +551,13 @@
             return false;
         };
 
-        $scope.deleteHttpMethod = function (path, initialName) {
-            delete path[initialName];
-            path.freeHttpMethods.push(initialName);
+        $scope.deleteHttpMethod = function (path, name) {
+            delete path[name];
+            path.freeHttpMethods.push(name);
         };
         $scope.addHttpMethod = function (path, methodToCreate)  {
             path[methodToCreate] = {
                 name: methodToCreate,
-                initialName: methodToCreate,
                 summary: "",
                 description: "",
                 produces: [$scope.contentTypes[0]],
