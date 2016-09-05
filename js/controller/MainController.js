@@ -193,6 +193,8 @@
                 var pathObj = obj.paths[path];
 
                 pathObj.name = path;
+                pathObj.initialName = path;
+                pathObj.freeHttpMethods = $scope.findFreeMethods(pathObj);
 
                 for (var meth in pathObj) {
                     if (!pathObj.hasOwnProperty(meth) || !$scope.isHttpMethod(meth)) {
@@ -249,6 +251,7 @@
                 }
                 delete pathObj.name;
                 delete pathObj.initialName;
+                delete pathObj.freeHttpMethods;
 
                 for (var meth in pathObj) {
                     if (!pathObj.hasOwnProperty(meth) || !$scope.isHttpMethod(meth)) {
@@ -517,7 +520,7 @@
             else {
                 $scope.swaggerObject.paths[name] = {
                     name: name,
-                    initialName: name,
+                    initialName: name
                 };
             }
         };
@@ -551,16 +554,12 @@
 
         $scope.deleteHttpMethod = function (path, initialName) {
             delete path[initialName];
+            path.freeHttpMethods.push(initialName);
         };
-        $scope.addHttpMethod = function (path)  {
-            var freeMethod = $scope.findFreeMethod(path);
-            if (!freeMethod) {
-                alert("I'm afraid there're no more free HTTP methods left.");
-            }
-
-            path[freeMethod] = {
-                name: freeMethod,
-                initialName: freeMethod,
+        $scope.addHttpMethod = function (path, methodToCreate)  {
+            path[methodToCreate] = {
+                name: methodToCreate,
+                initialName: methodToCreate,
                 summary: "",
                 description: "",
                 produces: [$scope.contentTypes[0]],
@@ -569,16 +568,22 @@
                 parameters: [],
                 responses: {}
             };
+
+            var idx = path.freeHttpMethods.indexOf(methodToCreate);
+            path.freeHttpMethods.splice(idx, 1);
+
+            $scope.methodToCreate = null;
         };
-        $scope.findFreeMethod = function (path) {
-            for (i in $scope.httpMethods) {
-                var meth = $scope.httpMethods[i];
-                if (!path[meth]) {
-                    return meth;
+        $scope.findFreeMethods = function (pathObj) {
+            var freeHttpMethods = angular.copy($scope.httpMethods);
+            for (meth in pathObj) {
+                if (pathObj.hasOwnProperty(meth) && $scope.isHttpMethod(meth)) {
+                    var idx = freeHttpMethods.indexOf(meth);
+                    freeHttpMethods.splice(idx, 1);
                 }
             }
 
-            return null;
+            return freeHttpMethods;
         };
 
         $scope.getFieldNames = function (obj) {
@@ -598,6 +603,27 @@
         };
         $scope.addTagToMethod = function (method) {
             method.tags.push($scope.selectedTag.selected.name);
+        };
+
+        $scope.propNameLoseFocus = function (def, prop) {
+            if (prop.initialName != prop.name && def.properties[prop.name]) {
+                alert("All properties must be unique in one product.");
+                prop.name = prop.initialName;
+            }
+        };
+
+        $scope.defNameLoseFocus = function (def) {
+            if (def.initialName != def.name && $scope.swaggerObject.definitions[def.name]) {
+                alert("All definition names must be unique.");
+                def.name = def.initialName;
+            }
+        };
+
+        $scope.pathNameLoseFocus = function (path) {
+            if (path.initialName != path.name && $scope.swaggerObject.paths[path.name]) {
+                alert("All path names must be unique.");
+                path.name = path.initialName;
+            }
         };
     });
 })();

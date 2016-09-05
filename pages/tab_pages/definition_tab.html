@@ -1,6 +1,6 @@
 <div>
     <div ng-repeat="def in swaggerObject.definitions" style="margin-top: 15px; border-bottom: 1px solid black;">
-        <span>Name: </span> <input type="text" required ng-model="def.name"> <br/>
+        <span>Name: </span> <input type="text" required ng-model="def.name" ng-blur="defNameLoseFocus(def)"> <br/>
         <span>Type: </span>
         <select ng-model="def.type" required ng-options="type for type in definitionTypes"></select> <br/>
 
@@ -30,7 +30,7 @@
                     </tr>
                     <tr ng-repeat="prop in def.properties">
                         <td>
-                            <input type="text" required ng-model="prop.name">
+                            <input type="text" required ng-model="prop.name" ng-blur="propNameLoseFocus(def, prop)">
                         </td>
                         <td>
                             <input type="text" ng-model="prop.description">

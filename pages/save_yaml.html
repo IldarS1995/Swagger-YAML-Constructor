@@ -2,5 +2,8 @@
 <span ng-if="swaggerObject && !form.$valid" style="color: red;">
     All fields (exception Description) must be non-empty.
 </span>
-<input type="submit" value="Save as YAML" ng-hide="!swaggerObject || !form.$valid">
+<span ng-if="swaggerObject && hasErrors()">
+    Please correct all errors.
+</span>
+<input type="submit" value="Save as YAML" ng-hide="!swaggerObject || !form.$valid || hasErrors()">
 </div>

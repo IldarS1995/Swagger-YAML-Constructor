@@ -3,7 +3,8 @@
 
 <div ng-repeat="path in swaggerObject.paths" style="border-bottom: 5px solid black; margin-top: 15px;">
     <div style="margin-bottom: 25px;">
-        <span style="font-size: 16px; font-weight: bold;">Name: </span> <input type="text" ng-model="path.name">
+        <span style="font-size: 16px; font-weight: bold;">URI: </span>
+        <input type="text" ng-model="path.name" ng-blur="pathNameLoseFocus(path)">
     </div>
 
     <div ng-repeat="(methName, method) in path" ng-if="isHttpMethod(methName)"
@@ -12,7 +13,7 @@
         <table>
             <tr>
                 <td>Method:</td>
-                <td><select required ng-model="method.name" ng-options="m for m in httpMethods"></select></td>
+                <td>{{method.name}}</td>
             </tr>
             <tr>
                 <td>Summary:</td>
@@ -103,7 +104,11 @@
         <button type="button" ng-click="deleteHttpMethod(path, method.initialName)">Delete method</button>
 
     </div> <!-- Method -->
-    <button type="button" ng-click="addHttpMethod(path)">Add new method</button>
+    <div ng-if="path.freeHttpMethods.length > 0">
+        Available methods for creation:
+        <select ng-model="methodToCreate" ng-options="meth for meth in path.freeHttpMethods"></select>
+        <button type="button" ng-click="addHttpMethod(path, methodToCreate)">Add new method</button>
+    </div>
     <button type="button" ng-click="deletePath(path)">Delete path</button>
 
 </div> <!-- Path -->
