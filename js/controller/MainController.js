@@ -252,6 +252,7 @@
                 delete pathObj.name;
                 delete pathObj.initialName;
                 delete pathObj.freeHttpMethods;
+                delete pathObj.methodToCreate;
 
                 for (var meth in pathObj) {
                     if (!pathObj.hasOwnProperty(meth) || !$scope.isHttpMethod(meth)) {
@@ -470,7 +471,15 @@
         };
 
         $scope.addNewProperty = function (def) {
-            var newName = "property_" + Math.random();
+            var newName = prompt("Enter the property name", "Prop");
+            if (!newName) {
+                return;
+            }
+
+            if ($scope.containsPropertyWithName(def.properties, newName)) {
+                alert("There's already a property with such name. Try another one.");
+                return;
+            }
 
             def.properties[newName] = {
                 initialName: newName,
@@ -478,6 +487,19 @@
                 description: "descr",
                 type: "integer"
             };
+        };
+
+        $scope.containsPropertyWithName = function(props, name) {
+            for (i in props) {
+                if (!props.hasOwnProperty(i)) {
+                    continue;
+                }
+
+                if (props[i].name === name) {
+                    return true;
+                }
+            }
+            return false;
         };
 
         $scope.deleteDefinition = function (def) {
