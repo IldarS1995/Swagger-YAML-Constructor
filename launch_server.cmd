@@ -1,0 +1,1 @@
+npm install http-server -g & cd ./pages & http-server
