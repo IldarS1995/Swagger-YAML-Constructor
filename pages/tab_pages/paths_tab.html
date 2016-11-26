@@ -106,8 +106,8 @@
     </div> <!-- Method -->
     <div ng-if="path.freeHttpMethods.length > 0">
         Available methods for creation:
-        <select ng-model="methodToCreate" ng-options="meth for meth in path.freeHttpMethods"></select>
-        <button type="button" ng-click="addHttpMethod(path, methodToCreate)">Add new method</button>
+        <select ng-model="path.methodToCreate" ng-options="meth for meth in path.freeHttpMethods"></select>
+        <button type="button" ng-click="addHttpMethod(path, path.methodToCreate)">Add new method</button>
     </div>
     <button type="button" ng-click="deletePath(path)">Delete path</button>
 

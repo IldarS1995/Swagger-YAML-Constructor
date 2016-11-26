@@ -513,13 +513,19 @@
         };
         $scope.addNewPath = function () {
             var name = prompt("Please choose the URI", "/path");
+            if (!name) {
+                return;
+            }
+
             if ($scope.swaggerObject.paths[name]) {
-                alert("There's already such parameter in the list.");
+                alert("There's already such path in the list.");
             }
             else {
                 $scope.swaggerObject.paths[name] = {
                     name: name,
-                    initialName: name
+                    initialName: name,
+                    freeHttpMethods: angular.copy($scope.httpMethods),
+                    methodToCreate: $scope.httpMethods[0]
                 };
             }
         };
@@ -554,6 +560,7 @@
         $scope.deleteHttpMethod = function (path, name) {
             delete path[name];
             path.freeHttpMethods.push(name);
+            path.methodToCreate = path.freeHttpMethods[0];
         };
         $scope.addHttpMethod = function (path, methodToCreate)  {
             path[methodToCreate] = {
@@ -569,8 +576,7 @@
 
             var idx = path.freeHttpMethods.indexOf(methodToCreate);
             path.freeHttpMethods.splice(idx, 1);
-
-            $scope.methodToCreate = null;
+            path.methodToCreate = path.freeHttpMethods[0];
         };
         $scope.findFreeMethods = function (pathObj) {
             var freeHttpMethods = angular.copy($scope.httpMethods);
