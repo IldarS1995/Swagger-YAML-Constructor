@@ -432,9 +432,18 @@
         };
 
         $scope.addNewDefinition = function () {
-            var newName = "ObjDto_" + Math.random();
             if (!$scope.swaggerObject.definitions) {
                 $scope.swaggerObject.definitions = {};
+            }
+
+            var newName = prompt("Enter the definition name", "ObjDto");
+            if (!newName) {
+                return;
+            }
+
+            if ($scope.hasDefinitionWithName(newName)) {
+                alert("There's already a definition with such name. Please choose another.");
+                return;
             }
 
             $scope.swaggerObject.definitions[newName] = {
@@ -444,6 +453,22 @@
                 properties: {}
             };
         };
+
+        $scope.hasDefinitionWithName = function(name) {
+            var obj = $scope.swaggerObject;
+            for (var i in obj.definitions) {
+                if (!obj.definitions.hasOwnProperty(i)) {
+                    continue;
+                }
+
+                var def = obj.definitions[i];
+                if (def.name === name) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
         $scope.addNewProperty = function (def) {
             var newName = "property_" + Math.random();
 

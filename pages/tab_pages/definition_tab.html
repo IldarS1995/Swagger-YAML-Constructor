@@ -1,10 +1,17 @@
 <div>
     <div ng-repeat="def in swaggerObject.definitions" style="margin-top: 15px; border-bottom: 1px solid black;">
-        <span>Name: </span> <input type="text" required ng-model="def.name" ng-blur="defNameLoseFocus(def)"> <br/>
-        <span>Type: </span>
-        <select ng-model="def.type" required ng-options="type for type in definitionTypes"></select> <br/>
+        <table>
+            <tr>
+                <td>Name:</td>
+                <td><input type="text" required ng-model="def.name" ng-blur="defNameLoseFocus(def)"></td>
+            </tr>
+            <tr>
+                <td>Type:</td>
+                <td><select ng-model="def.type" required ng-options="type for type in definitionTypes"></select></td>
+            </tr>
+        </table>
 
-        <div ng-switch="def.type">
+        <div ng-switch="def.type" style="margin-bottom: 20px;">
 
             <div ng-switch-when="array">
                 <select ng-model="def.items.type" required
@@ -20,7 +27,7 @@
 
             <div ng-switch-when="object">
                 Properties:
-                <table border="1">
+                <table border="1" ng-if="getFieldNames(def.properties).length">
                     <tr>
                         <th>Name</th>
                         <th>Description</th>
@@ -68,6 +75,11 @@
                         </td>
                     </tr>
                 </table>
+                <div ng-if="!getFieldNames(def.properties).length">
+                    <span style="font-style: italic;">No properties yet</span>
+                </div>
+
+                <br />
                 <button type="button" ng-click="addNewProperty(def)">Add new property</button>
             </div>
             <button type="button" ng-click="deleteDefinition(def)">Delete the definition</button>
