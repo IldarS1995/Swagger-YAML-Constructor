@@ -23,6 +23,10 @@
 
         $scope.paramIn = ["header", "body", "query", "path"];
 
+        $scope.definitionPageSize = 8;
+        $scope.definitionCurrentPage = 1;
+        $scope.pathPageSize = 5;
+        $scope.pathCurrentPage = 1;
 
         $scope.setCurrentTab = function (tab) {
             $scope.currentTab = tab;

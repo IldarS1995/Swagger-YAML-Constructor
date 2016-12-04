@@ -1,7 +1,13 @@
 <div>
     <h3>Paths</h3>
 
-<div ng-repeat="path in swaggerObject.paths" style="border-bottom: 5px solid black; margin-top: 15px;">
+    <div style="margin-bottom: 35px; max-width: 300px;">
+        <label for="search">Search:</label>
+        <input ng-model="pathSearch" id="search" class="form-control" placeholder="Filter definitions">
+    </div>
+
+<div dir-paginate="path in swaggerObject.paths | filterByName:pathSearch | itemsPerPage: pathPageSize" current-page="pathCurrentPage"
+     style="border-bottom: 5px solid black; margin-top: 15px;">
     <div style="margin-bottom: 25px;">
         <span style="font-size: 16px; font-weight: bold;">URI: </span>
         <input type="text" ng-model="path.name" ng-blur="pathNameLoseFocus(path)">
@@ -113,4 +119,10 @@
 
 </div> <!-- Path -->
 <button type="button" ng-click="addNewPath()">Add new path</button>
+
+    <div>
+        <dir-pagination-controls boundary-links="true"
+                                 template-url="./tab_pages/dirPagination.tpl.html">
+        </dir-pagination-controls>
+    </div>
 </div>

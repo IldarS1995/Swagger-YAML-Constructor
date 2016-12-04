@@ -1,6 +1,6 @@
 var app;
 (function () {
-    app = angular.module('app', ['ngRoute', 'ngResource']);
+    app = angular.module('app', ['ngRoute', 'ngResource', 'angularUtils.directives.dirPagination']);
 
     app.directive('includeReplace', function () {
         return {
@@ -10,6 +10,22 @@ var app;
                 el.replaceWith(el.children());
             }
         };
+    });
+
+   app .filter('filterByName', function() {
+        return function(input, search) {
+            if (!input) return input;
+            if (!search) return input;
+            var expected = ('' + search).toLowerCase();
+            var result = {};
+            angular.forEach(input, function(value, key) {
+                var actual = ('' + key).toLowerCase();
+                if (actual.indexOf(expected) !== -1) {
+                    result[key] = value;
+                }
+            });
+            return result;
+        }
     });
 
     app.directive("fileread", [function () {

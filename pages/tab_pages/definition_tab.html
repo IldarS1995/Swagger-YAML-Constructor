@@ -1,5 +1,12 @@
 <div>
-    <div ng-repeat="def in swaggerObject.definitions" style="margin-top: 15px; border-bottom: 1px solid black;">
+    <div style="margin-bottom: 35px; max-width: 300px;">
+        <label for="search">Search:</label>
+        <input ng-model="defSearch" id="search" class="form-control" placeholder="Filter definitions">
+    </div>
+
+    <div dir-paginate="def in swaggerObject.definitions | filterByName:defSearch | itemsPerPage: definitionPageSize"
+         style="margin-top: 15px; border-bottom: 1px solid black;"
+         current-page="definitionCurrentPage">
         <table>
             <tr>
                 <td>Name:</td>
@@ -43,13 +50,15 @@
                             <input type="text" ng-model="prop.description">
                         </td>
                         <td>
-                            <select ng-model="prop.type" required ng-options="type for type in defPropertyTypes"></select>
+                            <select ng-model="prop.type" required
+                                    ng-options="type for type in defPropertyTypes"></select>
                         </td>
                         <td>
                             <div ng-switch="prop.type">
                                 <div ng-switch-when="$ref">
                                     <select ng-model="prop.$ref" required>
-                                        <option ng-repeat="(key, val) in swaggerObject.definitions" value="{{prefixDef(key)}}">
+                                        <option ng-repeat="(key, val) in swaggerObject.definitions"
+                                                value="{{prefixDef(key)}}">
                                             {{val.name}}
                                         </option>
                                     </select>
@@ -59,7 +68,8 @@
                                             ng-options="type for type in innerPropertyTypes"></select>
                                     <div ng-if="prop.items.type == '$ref'">
                                         <select ng-model="prop.items.$ref" required>
-                                            <option ng-repeat="(key, val) in swaggerObject.definitions" value="{{prefixDef(key)}}">
+                                            <option ng-repeat="(key, val) in swaggerObject.definitions"
+                                                    value="{{prefixDef(key)}}">
                                                 {{val.name}}
                                             </option>
                                         </select>
@@ -79,7 +89,7 @@
                     <span style="font-style: italic;">No properties yet</span>
                 </div>
 
-                <br />
+                <br/>
                 <button type="button" ng-click="addNewProperty(def)">Add new property</button>
             </div>
             <button type="button" ng-click="deleteDefinition(def)">Delete the definition</button>
@@ -87,4 +97,10 @@
         </div>
     </div>
     <button type="button" ng-click="addNewDefinition()">Add new definition</button>
+
+    <div>
+        <dir-pagination-controls boundary-links="true"
+                                 template-url="./tab_pages/dirPagination.tpl.html">
+        </dir-pagination-controls>
+    </div>
 </div>
